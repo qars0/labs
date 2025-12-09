@@ -43,9 +43,6 @@ class StudentCRUD {
                 <td>${entry.updated_at ? this.formatDateTime(entry.updated_at) : '—'}</td>
                 <td>
                     <div style="display: flex; gap: 5px;">
-                        <button class="btn btn-outline btn-sm" onclick="studentCRUD.editDiaryEntry(${entry.entry_id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
                         <button class="btn btn-outline btn-sm btn-danger" onclick="studentCRUD.deleteDiaryEntry(${entry.entry_id})">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -184,9 +181,6 @@ class StudentCRUD {
                 <td>${work.updated_at ? this.formatDateTime(work.updated_at) : '—'}</td>
                 <td>
                     <div style="display: flex; gap: 5px;">
-                        <button class="btn btn-outline btn-sm" onclick="studentCRUD.editIndividualWork(${work.individual_work_id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
                         <button class="btn btn-outline btn-sm btn-danger" onclick="studentCRUD.deleteIndividualWork(${work.individual_work_id})">
                             <i class="fas fa-trash"></i>
                         </button>

@@ -234,10 +234,26 @@ class AdminPanel {
             this.showAlert('Нет данных для генерации отчета', 'error');
             return;
         }
-
+    
         // Используем pdfGenerator.js
-        if (typeof generatePDF === 'function') {
-            generatePDF(this.lastResult, 'Отчет системы практик');
+        if (typeof generateStyledPDF === 'function') {
+            // Отключаем кнопку на время генерации
+            const pdfBtn = document.getElementById('generatePDF');
+            if (pdfBtn) {
+                const originalText = pdfBtn.innerHTML;
+                pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерация...';
+                pdfBtn.disabled = true;
+                
+                setTimeout(() => {
+                    generateStyledPDF(this.lastResult, 'Отчет системы практик');
+                    
+                    // Восстанавливаем кнопку
+                    pdfBtn.innerHTML = originalText;
+                    pdfBtn.disabled = false;
+                }, 100);
+            } else {
+                generateStyledPDF(this.lastResult, 'Отчет системы практик');
+            }
         } else {
             this.showAlert('Функция генерации PDF недоступна', 'error');
         }
