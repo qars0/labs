@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API системы практик</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        button { margin: 5px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; max-height: 300px; overflow: auto; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тест API системы управления практиками</h1>
+        
+        <div class="section">
+            <h2>Авторизация</h2>
+            <input type="text" id="username" placeholder="Имя пользователя" value="admin">
+            <input type="password" id="password" placeholder="Пароль" value="admin">
+            <button onclick="login()">Войти</button>
+            <div id="authResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Статические запросы (10)</h2>
+            <button onclick="testQuery(1)">1. Все пользователи</button>
+            <button onclick="testQuery(2)">2. Все практики</button>
+            <button onclick="testQuery(3)">3. Студенты с группами</button>
+            <button onclick="testQuery(4)">4. Записи дневника</button>
+            <button onclick="testQuery(5)">5. Администраторы</button>
+            <button onclick="testQuery(6)">6. Студенты с записями</button>
+            <button onclick="testQuery(7)">7. Студенты с местами</button>
+            <button onclick="testQuery(8)">8. Руководители</button>
+            <button onclick="testQuery(9)">9. Представление студентов</button>
+            <button onclick="testQuery(10)">10. Представление практик</button>
+            <div id="queryResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Динамический запрос</h2>
+            <textarea id="dynamicQuery" rows="4" cols="80">SELECT * FROM users LIMIT 5</textarea><br>
+            <button onclick="executeDynamicQuery()">Выполнить SELECT запрос</button>
+            <div id="dynamicResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Функции</h2>
+            <button onclick="testFunction(1)">Кол-во студентов на практике 1</button>
+            <button onclick="testFunction(2)">Среднее кол-во записей</button>
+            <div id="functionResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Процедуры</h2>
+            <button onclick="testProcedure(1)">Добавить студента</button>
+            <button onclick="testProcedure(2)">Закрыть практику</button>
+            <div id="procedureResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Транзакции</h2>
+            <button onclick="testTransaction(1)">Переместить студента</button>
+            <button onclick="testTransaction(2)">Удалить студента</button>
+            <div id="transactionResult" class="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = '/api';
+        
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                document.getElementById('authResult').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function testQuery(num) {
+            const endpoints = [
+                '/queries/users',
+                '/queries/practices',
+                '/queries/students-groups',
+                '/queries/diary',
+                '/queries/admins',
+                '/queries/students-recent-diary',
+                '/queries/students-practice-location',
+                '/queries/supervisors-details',
+                '/queries/student-groups-view',
+                '/queries/practice-students-view'
+            ];
+            
+            try {
+                const response = await fetch(API_URL + endpoints[num-1]);
+                const result = await response.json();
+                document.getElementById('queryResult').innerHTML = `<pre>Запрос ${num}: ${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('queryResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function executeDynamicQuery() {
+            const query = document.getElementById('dynamicQuery').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/queries/dynamic`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                
+                const result = await response.json();
+                document.getElementById('dynamicResult').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('dynamicResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function testFunction(num) {
+            const endpoints = [
+                '/functions/students-count/1',
+                '/functions/avg-diary-entries'
+            ];
+            
+            try {
+                const response = await fetch(API_URL + endpoints[num-1]);
+                const result = await response.json();
+                document.getElementById('functionResult').innerHTML = `<pre>Функция ${num}: ${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('functionResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function testProcedure(num) {
+            const procedures = [
+                {
+                    endpoint: '/procedures/add-student',
+                    data: {
+                        username: 'test_student',
+                        password: 'test123',
+                        full_name: 'Тестовый Студент',
+                        group_id: 1,
+                        practice_id: 1
+                    }
+                },
+                {
+                    endpoint: '/procedures/close-practice',
+                    data: {
+                        practice_id: 1,
+                        end_date: '2025-10-31'
+                    }
+                }
+            ];
+            
+            try {
+                const response = await fetch(API_URL + procedures[num-1].endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(procedures[num-1].data)
+                });
+                
+                const result = await response.json();
+                document.getElementById('procedureResult').innerHTML = `<pre>Процедура ${num}: ${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('procedureResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function testTransaction(num) {
+            const transactions = [
+                {
+                    endpoint: '/transactions/move-student',
+                    data: {
+                        student_id: 1,
+                        new_group_id: 2
+                    }
+                },
+                {
+                    endpoint: '/transactions/delete-student',
+                    data: {
+                        student_id: 1
+                    }
+                }
+            ];
+            
+            try {
+                const response = await fetch(API_URL + transactions[num-1].endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(transactions[num-1].data)
+                });
+                
+                const result = await response.json();
+                document.getElementById('transactionResult').innerHTML = `<pre>Транзакция ${num}: ${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('transactionResult').innerHTML = `Ошибка: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

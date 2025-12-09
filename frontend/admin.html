@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора - ОмГТУ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Панель администратора</span>
+            </div>
+            <div class="user-info" id="userInfo">
+                <!-- Заполняется через JS -->
+            </div>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="student.html" class="nav-link">
+                <i class="fas fa-user-graduate"></i> Личный кабинет
+            </a>
+            <a href="admin.html" class="nav-link active">
+                <i class="fas fa-chart-line"></i> Админ-панель
+            </a>
+            <div style="margin-left: auto;">
+                <button onclick="auth.logout()" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </div>
+        </nav>
+
+        <main>
+            <h1 class="section-title">
+                <i class="fas fa-database"></i> Управление базой данных
+            </h1>
+
+            <!-- Табы -->
+            <div class="tabs">
+                <button class="tab active" data-tab="queries">SQL Запросы</button>
+                <button class="tab" data-tab="functions">Функции</button>
+                <button class="tab" data-tab="procedures">Процедуры</button>
+                <button class="tab" data-tab="transactions">Транзакции</button>
+            </div>
+
+            <!-- Вкладка запросов -->
+            <div id="queries-tab" class="tab-content active">
+                <!-- 10 статических запросов -->
+                <div class="card">
+                    <h3><i class="fas fa-list"></i> Статические запросы (10 шт.)</h3>
+                    
+                    <div class="query-panel">
+                        <!-- Простые запросы (4) -->
+                        <div class="query-card">
+                            <h4>Все пользователи</h4>
+                            <button class="btn btn-primary" data-query="users">
+                                <i class="fas fa-users"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Все практики</h4>
+                            <button class="btn btn-primary" data-query="practices">
+                                <i class="fas fa-briefcase"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Студенты с группами</h4>
+                            <button class="btn btn-primary" data-query="students-groups">
+                                <i class="fas fa-user-graduate"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Записи дневника</h4>
+                            <button class="btn btn-primary" data-query="diary">
+                                <i class="fas fa-book"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <!-- Запросы с подзапросом (2) -->
+                        <div class="query-card">
+                            <h4>Администраторы</h4>
+                            <button class="btn btn-primary" data-query="admins">
+                                <i class="fas fa-user-shield"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Студенты с записями</h4>
+                            <button class="btn btn-primary" data-query="students-recent-diary">
+                                <i class="fas fa-calendar-check"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <!-- Запросы с JOIN (2) -->
+                        <div class="query-card">
+                            <h4>Студенты с местами</h4>
+                            <button class="btn btn-primary" data-query="students-practice-location">
+                                <i class="fas fa-map-marker-alt"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Руководители</h4>
+                            <button class="btn btn-primary" data-query="supervisors-details">
+                                <i class="fas fa-chalkboard-teacher"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <!-- Запросы к представлениям (2) -->
+                        <div class="query-card">
+                            <h4>Представление студентов</h4>
+                            <button class="btn btn-primary" data-query="student-groups-view">
+                                <i class="fas fa-eye"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Представление практик</h4>
+                            <button class="btn btn-primary" data-query="practice-students-view">
+                                <i class="fas fa-chart-bar"></i> Выполнить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Динамический запрос -->
+                <div class="card">
+                    <h3><i class="fas fa-code"></i> Динамический SQL запрос</h3>
+                    <p>Введите SELECT запрос для выполнения:</p>
+                    <textarea id="dynamicQuery" class="form-control" rows="4" 
+                              placeholder="SELECT * FROM users LIMIT 10">SELECT * FROM users LIMIT 5</textarea>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button onclick="adminPanel.executeDynamicQuery()" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Выполнить запрос
+                        </button>
+                        <button onclick="document.getElementById('dynamicQuery').value = 'SELECT * FROM users LIMIT 5'" 
+                                class="btn btn-outline">
+                            <i class="fas fa-redo"></i> Пример
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка функций -->
+            <div id="functions-tab" class="tab-content">
+                <div class="card">
+                    <h3><i class="fas fa-function"></i> Функции базы данных</h3>
+                    
+                    <div class="query-panel">
+                        <div class="query-card">
+                            <h4>Количество студентов на практике</h4>
+                            <p class="small">Возвращает количество студентов на указанной практике</p>
+                            <button class="btn btn-success" data-function="students-count">
+                                <i class="fas fa-calculator"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Среднее количество записей в дневнике</h4>
+                            <p class="small">Рассчитывает среднее количество записей на одного студента</p>
+                            <button class="btn btn-success" data-function="avg-diary">
+                                <i class="fas fa-chart-line"></i> Выполнить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка процедур -->
+            <div id="procedures-tab" class="tab-content">
+                <div class="card">
+                    <h3><i class="fas fa-cogs"></i> Хранимые процедуры</h3>
+                    
+                    <div class="query-panel">
+                        <div class="query-card">
+                            <h4>Добавление студента</h4>
+                            <p class="small">Добавляет нового студента в систему</p>
+                            <button class="btn btn-warning" data-procedure="add-student">
+                                <i class="fas fa-user-plus"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Закрытие практики</h4>
+                            <p class="small">Обновляет дату окончания практики</p>
+                            <button class="btn btn-warning" data-procedure="close-practice">
+                                <i class="fas fa-lock"></i> Выполнить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка транзакций -->
+            <div id="transactions-tab" class="tab-content">
+                <div class="card">
+                    <h3><i class="fas fa-exchange-alt"></i> Транзакции</h3>
+                    
+                    <div class="query-panel">
+                        <div class="query-card">
+                            <h4>Перемещение студента</h4>
+                            <p class="small">Перемещает студента в другую группу</p>
+                            <button class="btn btn-info" data-transaction="move-student">
+                                <i class="fas fa-user-friends"></i> Выполнить
+                            </button>
+                        </div>
+                        
+                        <div class="query-card">
+                            <h4>Удаление студента</h4>
+                            <p class="small">Удаляет студента и связанные записи</p>
+                            <button class="btn btn-danger" data-transaction="delete-student">
+                                <i class="fas fa-user-times"></i> Выполнить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Результаты запросов -->
+            <div class="card">
+                <h3><i class="fas fa-poll"></i> Результаты запросов</h3>
+                <div id="queryResult" class="result-area">
+                    <p style="text-align: center; color: #999;">Здесь будут отображаться результаты запросов</p>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button onclick="adminPanel.generatePDF()" class="btn btn-success" id="generatePDF">
+                        <i class="fas fa-file-pdf"></i> Создать PDF отчет
+                    </button>
+                    <button onclick="document.getElementById('queryResult').innerHTML = ''" 
+                            class="btn btn-outline">
+                        <i class="fas fa-trash"></i> Очистить результаты
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/pdfGenerator.js"></script>
+</body>
+</html>

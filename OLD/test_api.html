@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API подключения</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { margin: 10px; padding: 10px 20px; }
+        .result { background: #f5f5f5; padding: 15px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Тест подключения к API</h1>
+    
+    <div>
+        <button onclick="testDirect()">1. Прямое подключение к бэкенду</button>
+        <button onclick="testThroughProxy()">2. Через nginx прокси</button>
+        <button onclick="testDB()">3. Тест базы данных</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        function addResult(title, data, isError = false) {
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function testDirect() {
+            try {
+                const response = await fetch('http://192.168.31.114:3000/');
+                const data = await response.json();
+                addResult('Прямое подключение к бэкенду (порт 3000)', data);
+            } catch (error) {
+                addResult('Ошибка прямого подключения', error.message, true);
+            }
+        }
+        
+        async function testThroughProxy() {
+            try {
+                const response = await fetch('/api/');
+                const data = await response.json();
+                addResult('Через nginx прокси (/api/)', data);
+            } catch (error) {
+                addResult('Ошибка через прокси', error.message, true);
+            }
+        }
+        
+        async function testDB() {
+            try {
+                const response = await fetch('/api/test-db');
+                const data = await response.json();
+                addResult('Тест базы данных', data);
+            } catch (error) {
+                addResult('Ошибка теста БД', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>
