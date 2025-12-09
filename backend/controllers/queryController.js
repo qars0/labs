@@ -3,7 +3,7 @@ const db = require('../config/db');
 // === 4 ПРОСТЫХ ЗАПРОСА ===
 
 // 1. Получить всех пользователей
-const getAllUsers = async (req, res) => {
+exports.getAllUsers = async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM users ORDER BY user_id');
     res.json(result.rows);
@@ -13,7 +13,7 @@ const getAllUsers = async (req, res) => {
 };
 
 // 2. Получить все практики
-const getAllPractices = async (req, res) => {
+exports.getAllPractices = async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM practice ORDER BY start_date');
     res.json(result.rows);
@@ -23,7 +23,7 @@ const getAllPractices = async (req, res) => {
 };
 
 // 3. Получить всех студентов с их группами
-const getAllStudentsWithGroups = async (req, res) => {
+exports.getAllStudentsWithGroups = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT s.student_id, u.full_name, g.group_name, p.start_date, p.end_date
@@ -40,7 +40,7 @@ const getAllStudentsWithGroups = async (req, res) => {
 };
 
 // 4. Получить все записи в дневнике
-const getAllDiaryEntries = async (req, res) => {
+exports.getAllDiaryEntries = async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM work_diary ORDER BY work_date DESC');
     res.json(result.rows);
@@ -52,7 +52,7 @@ const getAllDiaryEntries = async (req, res) => {
 // === 2 ЗАПРОСА С ПОДЗАПРОСОМ ===
 
 // 5. Пользователи, которые являются администраторами
-const getAdminUsers = async (req, res) => {
+exports.getAdminUsers = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT u.* 
@@ -67,7 +67,7 @@ const getAdminUsers = async (req, res) => {
 };
 
 // 6. Студенты с записями в дневнике за последние 7 дней
-const getStudentsWithRecentDiary = async (req, res) => {
+exports.getStudentsWithRecentDiary = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT DISTINCT s.student_id, u.full_name, g.group_name
@@ -90,7 +90,7 @@ const getStudentsWithRecentDiary = async (req, res) => {
 // === 2 ЗАПРОСА С JOIN ===
 
 // 7. Студенты с их практиками и местами проведения
-const getStudentsWithPracticeLocation = async (req, res) => {
+exports.getStudentsWithPracticeLocation = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT 
@@ -113,7 +113,7 @@ const getStudentsWithPracticeLocation = async (req, res) => {
 };
 
 // 8. Руководители практики с их ролями и организациями
-const getSupervisorsWithDetails = async (req, res) => {
+exports.getSupervisorsWithDetails = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT 
@@ -137,7 +137,7 @@ const getSupervisorsWithDetails = async (req, res) => {
 // Сначала создадим представления в базе данных
 
 // Представление 1: Студенты и их группы
-const createStudentGroupsView = async (req, res) => {
+exports.createStudentGroupsView = async (req, res) => {
   try {
     await db.query(`
       CREATE OR REPLACE VIEW student_groups_view AS
@@ -160,7 +160,7 @@ const createStudentGroupsView = async (req, res) => {
 };
 
 // 9. Запрос к представлению студентов и групп
-const getStudentGroupsView = async (req, res) => {
+exports.getStudentGroupsView = async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM student_groups_view ORDER BY full_name');
     res.json(result.rows);
@@ -170,7 +170,7 @@ const getStudentGroupsView = async (req, res) => {
 };
 
 // Представление 2: Практики с количеством студентов
-const createPracticeStudentsView = async (req, res) => {
+exports.createPracticeStudentsView = async (req, res) => {
   try {
     await db.query(`
       CREATE OR REPLACE VIEW practice_students_view AS
@@ -192,7 +192,7 @@ const createPracticeStudentsView = async (req, res) => {
 };
 
 // 10. Запрос к представлению практик с количеством студентов
-const getPracticeStudentsView = async (req, res) => {
+exports.getPracticeStudentsView = async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM practice_students_view ORDER BY start_date');
     res.json(result.rows);
@@ -204,7 +204,7 @@ const getPracticeStudentsView = async (req, res) => {
 // === ДИНАМИЧЕСКИЙ ЗАПРОС ===
 
 // 11. Динамический запрос (только SELECT для безопасности)
-const executeDynamicQuery = async (req, res) => {
+exports.executeDynamicQuery = async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -234,7 +234,7 @@ const executeDynamicQuery = async (req, res) => {
 // === ФУНКЦИИ ===
 
 // 12. Функция: количество студентов на практике
-const getStudentsCountOnPractice = async (req, res) => {
+exports.getStudentsCountOnPractice = async (req, res) => {
   try {
     const { practice_id } = req.params;
     const result = await db.query(
@@ -248,7 +248,7 @@ const getStudentsCountOnPractice = async (req, res) => {
 };
 
 // 13. Функция: среднее количество записей в дневнике на студента
-const getAvgDiaryEntries = async (req, res) => {
+exports.getAvgDiaryEntries = async (req, res) => {
   try {
     const result = await db.query('SELECT get_avg_diary_entries() as avg_entries');
     res.json(result.rows[0]);
@@ -260,20 +260,18 @@ const getAvgDiaryEntries = async (req, res) => {
 // === ПРОЦЕДУРЫ ===
 
 // 14. Процедура: добавить студента
-const addStudentProcedure = async (req, res) => {
+exports.addStudentProcedure = async (req, res) => {
   try {
     const { username, password, full_name, group_id, practice_id } = req.body;
     
-    const result = await db.query(
+    await db.query(
       'CALL add_student($1, $2, $3, $4, $5)',
       [username, password, full_name, group_id, practice_id]
     );
     
-    //result = result.rows[1]
     res.json({ 
       success: true, 
-      message: 'Студент успешно добавлен',
-      result
+      message: 'Студент успешно добавлен'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -281,19 +279,18 @@ const addStudentProcedure = async (req, res) => {
 };
 
 // 15. Процедура: закрыть практику
-const closePracticeProcedure = async (req, res) => {
+exports.closePracticeProcedure = async (req, res) => {
   try {
     const { practice_id, end_date } = req.body;
     
-    const result = await db.query(
+    await db.query(
       'CALL close_practice($1, $2)',
       [practice_id, end_date]
     );
     
     res.json({ 
       success: true, 
-      message: 'Практика успешно закрыта',
-      result 
+      message: 'Практика успешно закрыта'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -303,7 +300,7 @@ const closePracticeProcedure = async (req, res) => {
 // === ТРАНЗАКЦИИ ===
 
 // 16. Транзакция: переместить студента в другую группу
-const moveStudentTransaction = async (req, res) => {
+exports.moveStudentTransaction = async (req, res) => {
   const client = await db.pool.connect();
   
   try {
@@ -317,7 +314,7 @@ const moveStudentTransaction = async (req, res) => {
       [new_group_id, student_id]
     );
     
-    // Записываем в лог (если бы была таблица логов)
+    // Записываем в лог
     await client.query(
       'INSERT INTO work_diary (student_id, work_date, description) VALUES ($1, CURRENT_DATE, $2)',
       [student_id, `Студент переведен в группу ID: ${new_group_id}`]
@@ -338,7 +335,7 @@ const moveStudentTransaction = async (req, res) => {
 };
 
 // 17. Транзакция: удалить студента и связанные записи
-const deleteStudentTransaction = async (req, res) => {
+exports.deleteStudentTransaction = async (req, res) => {
   const client = await db.pool.connect();
   
   try {
@@ -378,39 +375,4 @@ const deleteStudentTransaction = async (req, res) => {
   }
 };
 
-module.exports = {
-  // Простые запросы
-  getAllUsers,
-  getAllPractices,
-  getAllStudentsWithGroups,
-  getAllDiaryEntries,
-  
-  // Запросы с подзапросом
-  getAdminUsers,
-  getStudentsWithRecentDiary,
-  
-  // Запросы с JOIN
-  getStudentsWithPracticeLocation,
-  getSupervisorsWithDetails,
-  
-  // Создание и запросы к представлениям
-  createStudentGroupsView,
-  createPracticeStudentsView,
-  getStudentGroupsView,
-  getPracticeStudentsView,
-  
-  // Динамический запрос
-  executeDynamicQuery,
-  
-  // Функции
-  getStudentsCountOnPractice,
-  getAvgDiaryEntries,
-  
-  // Процедуры
-  addStudentProcedure,
-  closePracticeProcedure,
-  
-  // Транзакции
-  moveStudentTransaction,
-  deleteStudentTransaction
-};
+module.exports = exports;

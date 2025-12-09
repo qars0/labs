@@ -6,47 +6,32 @@ console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_NAME:', process.env.DB_NAME);
 console.log('DB_PORT:', process.env.DB_PORT);
-console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : 'НЕ УСТАНОВЛЕН');
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***' : 'не установлен');
 
 const pool = new Pool({
-  user: process.env.DB_USER || 'admin',
+  user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'postgres',
-  database: process.env.DB_NAME || 'mydatabase',
-  password: process.env.DB_PASSWORD || 'admin123',
+  database: process.env.DB_NAME || 'practice_db',
+  password: process.env.DB_PASSWORD || 'postgres',
   port: process.env.DB_PORT || 5432,
-  connectionTimeoutMillis: 5000, // Таймаут подключения
-  idleTimeoutMillis: 30000,
 });
 
-// Обработчики событий
-pool.on('connect', () => {
-  console.log('✅ Новое подключение к PostgreSQL создано');
-});
+// Функция для выполнения запросов с параметрами
+const query = (text, params) => pool.query(text, params);
 
-pool.on('error', (err) => {
-  console.error('❌ Неожиданная ошибка на клиенте PostgreSQL:', err.message);
-  console.error('Stack:', err.stack);
-});
-
-const query = async (text, params) => {
-  console.log(`📝 SQL запрос: ${text}`);
-  if (params) console.log('Параметры:', params);
-  
-  const start = Date.now();
+// Функция для выполнения простых запросов
+const simpleQuery = async (text) => {
+  const client = await pool.connect();
   try {
-    const result = await pool.query(text, params);
-    const duration = Date.now() - start;
-    console.log(`✅ Запрос выполнен за ${duration}мс, строк: ${result.rowCount}`);
-    return result;
-  } catch (error) {
-    const duration = Date.now() - start;
-    console.error(`❌ Ошибка SQL за ${duration}мс:`, error.message);
-    console.error('SQL текст:', text);
-    throw error;
+    const result = await client.query(text);
+    return result.rows;
+  } finally {
+    client.release();
   }
 };
 
 module.exports = {
   query,
+  simpleQuery,
   pool
 };

@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
-// Простая авторизация (в учебных целях - без шифрования!)
-const login = async (req, res) => {
+
+exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
     
@@ -44,7 +44,7 @@ const login = async (req, res) => {
 };
 
 // Проверка авторизации
-const checkAuth = async (req, res) => {
+exports.checkAuth = async (req, res) => {
   try {
     const { userId } = req.body;
     
@@ -86,7 +86,4 @@ const checkAuth = async (req, res) => {
   }
 };
 
-module.exports = {
-  login,
-  checkAuth
-};
+module.exports = exports;

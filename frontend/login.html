@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему - ОмГТУ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1 class="login-title">
+            <i class="fas fa-graduation-cap"></i> ОмГТУ
+        </h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Система управления учебными практиками
+        </p>
+        
+        <div class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Имя пользователя</label>
+                <input type="text" id="username" class="form-control" placeholder="Введите имя пользователя" value="admin">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Пароль</label>
+                <input type="password" id="password" class="form-control" placeholder="Введите пароль" value="admin">
+            </div>
+            
+            <div id="loginMessage" style="display: none;" class="alert alert-error">
+                <!-- Сообщения об ошибках -->
+            </div>
+            
+            <button onclick="performLogin()" class="btn btn-primary" style="width: 100%;">
+                <i class="fas fa-sign-in-alt"></i> Войти в систему
+            </button>
+            
+            <p style="text-align: center; margin-top: 20px; color: #666;">
+                <small>
+                    Тестовые пользователи:<br>
+                    <strong>Администратор:</strong> admin / admin<br>
+                    <strong>Студент 1:</strong> student1 / 123<br>
+                    <strong>Студент 2:</strong> student2 / 123
+                </small>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function performLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const messageDiv = document.getElementById('loginMessage');
+            
+            if (!username || !password) {
+                messageDiv.textContent = 'Введите имя пользователя и пароль';
+                messageDiv.className = 'alert alert-error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                messageDiv.textContent = 'Выполняется вход...';
+                messageDiv.className = 'alert alert-info';
+                messageDiv.style.display = 'block';
+                
+                const result = await auth.login(username, password);
+                
+                if (result.success) {
+                    messageDiv.textContent = 'Успешный вход! Перенаправление...';
+                    messageDiv.className = 'alert alert-success';
+                    
+                    // Перенаправляем на главную страницу через 1 секунду
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    messageDiv.textContent = result.error || 'Ошибка входа';
+                    messageDiv.className = 'alert alert-error';
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Ошибка соединения с сервером';
+                messageDiv.className = 'alert alert-error';
+                console.error('Ошибка входа:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Если пользователь уже авторизован, перенаправляем на главную
+            if (auth.isAuthenticated()) {
+                window.location.href = 'index.html';
+            }
+            
+            // Разрешаем вход по нажатию Enter
+            document.getElementById('password').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performLogin();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

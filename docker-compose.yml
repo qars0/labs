@@ -3,31 +3,37 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: myapp_db
+    container_name: practice_db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: practice_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     networks:
-      - app-network
+      - practice-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"] #test: ["CMD-SHELL", "pg_isready -U ${DB_USER} || pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   backend:
     build: ./backend
-    container_name: myapp_backend
-    env_file:
-      - .env
+    container_name: practice_backend
+    environment:
+      NODE_ENV: development
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: practice_db
+      DB_HOST: postgres
+      DB_PORT: 5432
+      BACKEND_PORT: 3000
     ports:
-      - "${BACKEND_PORT}:3000"
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,21 +41,22 @@ services:
       - ./backend:/app
       - /app/node_modules
     networks:
-      - app-network
+      - practice-network
+    command: npm run dev
 
   frontend:
     build: ./frontend
-    container_name: myapp_frontend
+    container_name: practice_frontend
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "8080:80"
     depends_on:
       - backend
     networks:
-      - app-network
+      - practice-network
 
 volumes:
   postgres_data:
 
 networks:
-  app-network:
+  practice-network:
     driver: bridge

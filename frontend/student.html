@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет студента - ОмГТУ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-user-graduate"></i>
+                <span>Личный кабинет студента</span>
+            </div>
+            <div class="user-info" id="userInfo">
+                <!-- Заполняется через JS -->
+            </div>
+        </header>
+
+        <nav>
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-home"></i> Главная
+            </a>
+            <a href="student.html" class="nav-link active">
+                <i class="fas fa-user-graduate"></i> Мой профиль
+            </a>
+            <a href="admin.html" class="nav-link" id="adminNav" style="display: none;">
+                <i class="fas fa-chart-line"></i> Админ-панель
+            </a>
+            <div style="margin-left: auto;">
+                <button onclick="auth.logout()" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </div>
+        </nav>
+
+        <main>
+            <!-- Профиль студента -->
+            <div class="card" id="profileCard">
+                <h3><i class="fas fa-id-card"></i> Информация о практике</h3>
+                <div id="profileContent" style="text-align: center; padding: 20px;">
+                    <p><i class="fas fa-spinner fa-spin"></i> Загрузка профиля...</p>
+                </div>
+            </div>
+
+            <!-- Дневник практики -->
+            <div class="card">
+                <h3><i class="fas fa-book"></i> Дневник практики</h3>
+                
+                <div class="form-group">
+                    <label for="workDate">Дата выполнения работы</label>
+                    <input type="date" id="workDate" class="form-control" 
+                           value="<?php echo date('Y-m-d'); ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="diaryDescription">Описание выполненной работы</label>
+                    <textarea id="diaryDescription" class="form-control" 
+                              placeholder="Опишите работу, выполненную сегодня..." 
+                              rows="3"></textarea>
+                </div>
+                
+                <button onclick="studentCRUD.addDiaryEntry()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить запись
+                </button>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Мои записи</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата работы</th>
+                                <th>Описание</th>
+                                <th>Создано</th>
+                                <th>Обновлено</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="diaryEntries">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">
+                                    Загрузка записей...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Индивидуальные задания -->
+            <div class="card">
+                <h3><i class="fas fa-tasks"></i> Индивидуальные задания</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="issueDate">Дата выдачи</label>
+                        <input type="date" id="issueDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workDeadline">Срок выполнения</label>
+                        <input type="date" id="workDeadline" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workDescription">Описание задания</label>
+                    <textarea id="workDescription" class="form-control" 
+                              placeholder="Опишите индивидуальное задание..." 
+                              rows="3"></textarea>
+                </div>
+                
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="completeMark">
+                    <label for="completeMark" style="margin: 0;">Задание выполнено</label>
+                </div>
+                
+                <button onclick="studentCRUD.addIndividualWork()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить задание
+                </button>
+                
+                <h4 style="margin-top: 30px; margin-bottom: 15px;">Мои задания</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата выдачи</th>
+                                <th>Описание</th>
+                                <th>Срок</th>
+                                <th>Выполнено</th>
+                                <th>Создано</th>
+                                <th>Обновлено</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="individualWorks">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #999;">
+                                    Загрузка заданий...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Модальное окно для редактирования записи дневника -->
+    <div id="editDiaryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Редактировать запись дневника</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editWorkDate">Дата выполнения работы</label>
+                    <input type="date" id="editWorkDate" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDiaryDescription">Описание работы</label>
+                    <textarea id="editDiaryDescription" class="form-control" rows="4"></textarea>
+                </div>
+                
+                <button onclick="studentCRUD.updateDiaryEntry()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+                <button onclick="studentCRUD.hideModal('editDiaryModal')" class="btn btn-outline">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования индивидуального задания -->
+    <div id="editIndividualModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Редактировать задание</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="editIssueDate">Дата выдачи</label>
+                        <input type="date" id="editIssueDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editWorkDeadline">Срок выполнения</label>
+                        <input type="date" id="editWorkDeadline" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editWorkDescription">Описание задания</label>
+                    <textarea id="editWorkDescription" class="form-control" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="editCompleteMark">
+                    <label for="editCompleteMark" style="margin: 0;">Задание выполнено</label>
+                </div>
+                
+                <button onclick="studentCRUD.updateIndividualWork()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+                <button onclick="studentCRUD.hideModal('editIndividualModal')" class="btn btn-outline">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/student-crud.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Проверяем авторизацию
+            if (!auth.requireAuth()) {
+                return;
+            }
+            
+            // Загружаем профиль студента
+            await loadStudentProfile();
+            
+            // Инициализируем CRUD функционал
+            await studentCRUD.init();
+        });
+
+        async function loadStudentProfile() {
+            try {
+                const user = auth.getCurrentUser();
+                const profile = await api.getStudentProfile(user.id);
+                
+                const profileHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div>
+                            <p><strong>ФИО студента:</strong></p>
+                            <h2 style="color: #667eea;">${profile.full_name || user.fullName}</h2>
+                        </div>
+                        <div>
+                            <p><strong>Учебная группа:</strong></p>
+                            <h3>${profile.group_name || 'Не указана'}</h3>
+                        </div>
+                        <div>
+                            <p><strong>Период практики:</strong></p>
+                            <h3>${formatDate(profile.start_date)} - ${formatDate(profile.end_date)}</h3>
+                        </div>
+                        <div>
+                            <p><strong>Место практики:</strong></p>
+                            <h3>${profile.location || 'Не указано'}</h3>
+                        </div>
+                    </div>
+                    
+                    ${profile.supervisors && profile.supervisors.length > 0 ? `
+                    <div style="margin-top: 30px;">
+                        <h4><i class="fas fa-chalkboard-teacher"></i> Руководители практики</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+                            ${profile.supervisors.map(supervisor => `
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                                    <h5 style="margin-bottom: 10px; color: #333;">${supervisor.full_name}</h5>
+                                    <p><strong>Должность:</strong> ${supervisor.position_name}</p>
+                                    <p><strong>Организация:</strong> ${supervisor.organization_name}</p>
+                                    <p><strong>Роль:</strong> ${supervisor.role_name}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('profileContent').innerHTML = profileHTML;
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+                document.getElementById('profileContent').innerHTML = `
+                    <p style="color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle"></i> Ошибка загрузки профиля
+                    </p>
+                `;
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU');
+            } catch (e) {
+                return dateString;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -81,8 +81,7 @@ CREATE TABLE IF NOT EXISTS work_diary (
     entry_id SERIAL PRIMARY KEY,
     student_id INTEGER NOT NULL,
     work_date DATE NOT NULL,
-    description TEXT NOT NULL,
-    CONSTRAINT work_diary_student_fk FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+    description TEXT NOT NULL
 );
 
 -- Individual_work таблица
@@ -121,6 +120,21 @@ CREATE INDEX IF NOT EXISTS idx_individual_work_student_id ON individual_work(stu
 CREATE INDEX IF NOT EXISTS idx_supervisor_practice_id ON supervisor(practice_id);
 CREATE INDEX IF NOT EXISTS idx_supervisor_position_id ON supervisor(position_id);
 CREATE INDEX IF NOT EXISTS idx_supervisor_role_id ON supervisor(role_id);
+
+-- === ОБНОВЛЕНИЕ ТАБЛИЦ ===
+
+-- Добавляем created_at в work_diary
+ALTER TABLE work_diary ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Добавляем created_at в individual_work
+ALTER TABLE individual_work ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Добавляем новые столбцы для отслеживания изменений
+ALTER TABLE work_diary ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+ALTER TABLE work_diary ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE individual_work ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+ALTER TABLE individual_work ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
 
 -- Вставка тестовых данных
 INSERT INTO practice_organization (organization_name) 
@@ -167,26 +181,40 @@ VALUES
     ('2025-10-01', '2025-11-30', 2)
 ON CONFLICT (practice_id) DO NOTHING;
 
--- Создание пользователя для приложения
---DO $$
---BEGIN
---    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
---        CREATE USER app_user WITH PASSWORD 'app_password';
---    END IF;
---END
---$$;
---
--- Даем права пользователю приложения
---GRANT CONNECT ON DATABASE mydatabase TO app_user;
---GRANT USAGE ON SCHEMA public TO app_user;
---GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
---GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO app_user;
-
 COMMENT ON TABLE users IS 'Таблица пользователей системы';
 COMMENT ON TABLE student IS 'Таблица студентов';
 COMMENT ON TABLE practice IS 'Таблица практик';
 COMMENT ON TABLE work_diary IS 'Дневник практики студентов';
 COMMENT ON COLUMN users.password IS 'Пароль';
+
+-- === ПРЕДСТАВЛЕНИЯ ===
+
+-- Представление 1: Студенты и их группы (создаем сразу)
+CREATE OR REPLACE VIEW student_groups_view AS
+SELECT 
+    s.student_id,
+    u.full_name,
+    g.group_name,
+    p.practice_id,
+    p.start_date,
+    p.end_date
+FROM student s
+JOIN users u ON s.user_id = u.user_id
+JOIN student_groups g ON s.group_id = g.group_id
+JOIN practice p ON s.practice_id = p.practice_id;
+
+-- Представление 2: Практики с количеством студентов
+CREATE OR REPLACE VIEW practice_students_view AS
+SELECT 
+    p.practice_id,
+    p.start_date,
+    p.end_date,
+    pl.location,
+    COUNT(s.student_id) as student_count
+FROM practice p
+LEFT JOIN student s ON p.practice_id = s.practice_id
+JOIN practice_location pl ON p.location_id = pl.location_id
+GROUP BY p.practice_id, p.start_date, p.end_date, pl.location;
 
 -- === ТРИГГЕРЫ ===
 
@@ -197,10 +225,14 @@ BEGIN
     IF NEW.work_date IS NULL THEN
         NEW.work_date = CURRENT_DATE;
     END IF;
+    IF NEW.created_at IS NULL THEN
+        NEW.created_at = CURRENT_TIMESTAMP;
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS diary_date_trigger ON work_diary;
 CREATE TRIGGER diary_date_trigger
 BEFORE INSERT ON work_diary
 FOR EACH ROW
@@ -221,6 +253,45 @@ CREATE TRIGGER practice_dates_trigger
 BEFORE INSERT OR UPDATE ON practice
 FOR EACH ROW
 EXECUTE FUNCTION check_practice_dates();
+
+-- 3. Триггер для individual_work
+CREATE OR REPLACE FUNCTION set_individual_work_date()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.created_at IS NULL THEN
+        NEW.created_at = CURRENT_TIMESTAMP;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS individual_work_date_trigger ON individual_work;
+CREATE TRIGGER individual_work_date_trigger
+BEFORE INSERT ON individual_work
+FOR EACH ROW
+EXECUTE FUNCTION set_individual_work_date();
+
+-- 4. Триггер для обновления updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Триггеры для обновления времени изменения
+DROP TRIGGER IF EXISTS update_work_diary_updated_at ON work_diary;
+CREATE TRIGGER update_work_diary_updated_at
+BEFORE UPDATE ON work_diary
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_individual_work_updated_at ON individual_work;
+CREATE TRIGGER update_individual_work_updated_at
+BEFORE UPDATE ON individual_work
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- === ФУНКЦИИ ===
 
@@ -252,6 +323,18 @@ BEGIN
     ) AS diary_counts;
     
     RETURN COALESCE(avg_entries, 0);
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Функция для проверки, что студент может редактировать только свои записи
+CREATE OR REPLACE FUNCTION check_student_ownership()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_student_id INTEGER;
+BEGIN
+    -- Получаем student_id текущего пользователя (нужно передавать через сессию, но для простоты)
+    -- В реальном приложении здесь будет проверка через JWT или сессию
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -300,8 +383,6 @@ BEGIN
     COMMIT;
 END;
 $$;
-
--- === ТРАНЗАКЦИИ (примеры в коде контроллера) ===
 
 -- === ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ПРОВЕРКИ ===
 
@@ -356,3 +437,38 @@ INSERT INTO schedule (practice_id, work_number, work_description, plan_start_dat
     (1, 2, 'Основная работа', '2025-09-06', '2025-09-20'),
     (2, 1, 'Ознакомительный этап', '2025-10-01', '2025-10-07')
 ON CONFLICT (schedule_id) DO NOTHING;
+
+-- Обновляем существующие записи с created_at
+UPDATE work_diary SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL;
+UPDATE individual_work SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL;
+
+-- Добавляем еще тестовых данных для студента 1
+INSERT INTO work_diary (student_id, work_date, description) 
+VALUES 
+    (1, '2025-09-03', 'Разработка прототипа интерфейса'),
+    (1, '2025-09-04', 'Тестирование функционала'),
+    (1, '2025-09-05', 'Подготовка отчета по практике')
+ON CONFLICT (entry_id) DO NOTHING;
+
+INSERT INTO individual_work (issue_date, work_description, issue_deadline, complete_mark, student_id) 
+VALUES 
+    ('2025-09-10', 'Изучить основы веб-разработки', '2025-09-20', FALSE, 1),
+    ('2025-09-15', 'Разработать макет базы данных', '2025-09-25', TRUE, 1)
+ON CONFLICT (individual_work_id) DO NOTHING;
+
+-- === ТРАНЗАКЦИИ (примеры в коде контроллера) ===
+
+-- Создание пользователя для приложения
+--DO $$
+--BEGIN
+--    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'app_user') THEN
+--        CREATE USER app_user WITH PASSWORD 'app_password';
+--    END IF;
+--END
+--$$;
+--
+-- Даем права пользователю приложения
+--GRANT CONNECT ON DATABASE mydatabase TO app_user;
+--GRANT USAGE ON SCHEMA public TO app_user;
+--GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+--GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO app_user;
