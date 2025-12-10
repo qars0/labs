@@ -1,3 +1,12 @@
+:root {
+  --color-primary: #06BA63; /*#667eea;*/
+  --color-ptimaty-gradient: #0FFF95;/*#764ba2;*/
+  --color-secondary: white;/*#f8f9fa;*/
+  --color-background: #EDF2F6;/*white;*/
+  --color-background-secondary: #E0F3F0;
+  --color-contrast: #513C2C; /*#495057;*/
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,7 +15,7 @@
 }
 
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-ptimaty-gradient) 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -15,7 +24,7 @@ body {
 }
 
 .container {
-    background: white;
+    background: var(--color-background);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     width: 100%;
@@ -26,8 +35,8 @@ body {
 
 /* Header */
 header {
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-ptimaty-gradient) 100%);
+    color: var(--color-background);
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
@@ -35,6 +44,7 @@ header {
 }
 
 .logo {
+    color: var(--color-secondary);
     font-size: 28px;
     font-weight: bold;
     display: flex;
@@ -55,18 +65,18 @@ header {
 .user-avatar {
     width: 40px;
     height: 40px;
-    background: white;
+    background: var(--color-background);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #667eea;
+    color: var(--color-primary);
     font-weight: bold;
 }
 
 /* Navigation */
 nav {
-    background: #f8f9fa;
+    background: var(--color-secondary);
     padding: 15px 40px;
     display: flex;
     gap: 20px;
@@ -75,21 +85,25 @@ nav {
 
 .nav-link {
     text-decoration: none;
-    color: #495057;
+    background: var(--color-secondary);
+    color: var(--color-primary);
     padding: 10px 20px;
     border-radius: 10px;
     transition: all 0.3s;
     font-weight: 500;
+
+    border: 2px solid var(--color-primary);
 }
 
 .nav-link:hover {
-    background: #e9ecef;
-    color: #667eea;
+    background: var(--color-primary);
+    color: var(--color-secondary);
 }
 
 .nav-link.active {
-    background: #667eea;
-    color: white;
+    background: var(--color-secondary);
+    color: var(--color-contrast);
+    border: 2px solid var(--color-contrast);
 }
 
 /* Main Content */
@@ -99,10 +113,10 @@ main {
 }
 
 .section-title {
-    color: #333;
+    color: var(--color-contrast);
     margin-bottom: 30px;
     font-size: 28px;
-    border-bottom: 3px solid #667eea;
+    border-bottom: 3px solid var(--color-primary);
     padding-bottom: 10px;
     display: flex;
     align-items: center;
@@ -111,8 +125,8 @@ main {
 
 /* Cards */
 .card {
-    background: white;
-    border: 1px solid #dee2e6;
+    background: var(--color-background);
+    border: 2px solid var(--color-contrast);
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 25px;
@@ -126,7 +140,7 @@ main {
 }
 
 .card h3 {
-    color: #667eea;
+    color: var(--color-primary);
     margin-bottom: 15px;
     font-size: 20px;
     display: flex;
@@ -142,14 +156,15 @@ main {
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: #555;
+    color: var(--color-contrast);
     font-weight: 500;
 }
 
 .form-control {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #dee2e6;
+    border: 1px solid var(--color-contrast);
+    background-color: var(--color-secondary);
     border-radius: 10px;
     font-size: 16px;
     transition: border-color 0.3s;
@@ -157,7 +172,7 @@ main {
 
 .form-control:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--color-primary);
 }
 
 textarea.form-control {
@@ -180,18 +195,20 @@ textarea.form-control {
 }
 
 .btn-primary {
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-ptimaty-gradient) 100%);
+    color: var(--color-secondary);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    
+    background-position: width;
 }
 
 .btn-success {
     background: #28a745;
-    color: white;
+    color: var(--color-background);
 }
 
 .btn-success:hover {
@@ -200,7 +217,7 @@ textarea.form-control {
 
 .btn-danger {
     background: #dc3545;
-    color: white;
+    color: var(--color-background);
 }
 
 .btn-danger:hover {
@@ -209,13 +226,13 @@ textarea.form-control {
 
 .btn-outline {
     background: transparent;
-    border: 2px solid #667eea;
-    color: #667eea;
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
 }
 
 .btn-outline:hover {
-    background: #667eea;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-secondary);
 }
 
 /* Tables */
@@ -226,28 +243,33 @@ textarea.form-control {
 }
 
 .table th {
-    background: #f8f9fa;
+    background: var(--color-secondary);
     padding: 15px;
     text-align: left;
     font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #dee2e6;
+    color: var(--color-contrast);
+    border-bottom: 2px solid var(--color-secondary);
 }
 
 .table td {
     padding: 12px 15px;
-    border-bottom: 1px solid #dee2e6;
-    color: #666;
+    border-bottom: 1px solid var(--color-secondary);
+    color: var(--color-contrast);
 }
 
 .table tr:hover {
-    background: #f8f9fa;
+    background: var(--color-secondary);
+    border: 1px solid var(--color-contrast);
+}
+.table tr {
+    background: var(--color-secondary);
+    border: 1px solid var(--color-contrast);
 }
 
 /* Results Area */
 .result-area {
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
+    background: var(--color-secondary);
+    border: 2px dashed var(--color-secondary);
     border-radius: 10px;
     padding: 20px;
     margin-top: 20px;
@@ -257,7 +279,7 @@ textarea.form-control {
 
 .result-table {
     width: 100%;
-    background: white;
+    background: var(--color-background);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -272,15 +294,15 @@ textarea.form-control {
 }
 
 .query-card {
-    background: white;
-    border: 1px solid #dee2e6;
+    background: var(--color-background);
+    border: 1px solid var(--color-contrast);
     border-radius: 10px;
     padding: 20px;
     text-align: center;
 }
 
 .query-card h4 {
-    color: #495057;
+    color: var(--color-contrast);
     margin-bottom: 15px;
     font-size: 16px;
 }
@@ -289,7 +311,7 @@ textarea.form-control {
 .login-container {
     max-width: 400px;
     margin: 100px auto;
-    background: white;
+    background: var(--color-background);
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -297,7 +319,7 @@ textarea.form-control {
 
 .login-title {
     text-align: center;
-    color: #667eea;
+    color: var(--color-primary);
     margin-bottom: 30px;
     font-size: 32px;
 }
@@ -317,15 +339,15 @@ textarea.form-control {
 }
 
 .dashboard-card {
-    background: white;
+    background: var(--color-background);
     border-radius: 15px;
     padding: 25px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    border-top: 5px solid #667eea;
+    border-top: 5px solid var(--color-primary);
 }
 
 .dashboard-card h3 {
-    color: #495057;
+    color: var(--color-contrast);
     margin-bottom: 15px;
     font-size: 18px;
 }
@@ -333,12 +355,12 @@ textarea.form-control {
 .stat-number {
     font-size: 36px;
     font-weight: bold;
-    color: #667eea;
+    color: var(--color-primary);
     margin: 10px 0;
 }
 
 .stat-label {
-    color: #6c757d;
+    color: var(--color-secondary);
     font-size: 14px;
 }
 
@@ -355,18 +377,18 @@ textarea.form-control {
     background: none;
     border: none;
     font-size: 16px;
-    color: #6c757d;
+    color: var(--color-contrast);
     border-bottom: 3px solid transparent;
     transition: all 0.3s;
 }
 
 .tab:hover {
-    color: #667eea;
+    color: var(--color-primary);
 }
 
 .tab.active {
-    color: #667eea;
-    border-bottom: 3px solid #667eea;
+    color: var(--color-primary);
+    border-bottom: 3px solid var(--color-primary);
     font-weight: 500;
 }
 
@@ -427,7 +449,7 @@ textarea.form-control {
 }
 
 .modal-content {
-    background: white;
+    background: var(--color-background);
     border-radius: 15px;
     padding: 30px;
     max-width: 500px;
