@@ -1,4 +1,4 @@
-// Простой PDF экспортер - только таблицы
+// Простой PDF экспортер с использованием autoTable
 class SimplePDFExporter {
     constructor() {
         this.jsPDF = window.jspdf;
@@ -15,89 +15,81 @@ class SimplePDFExporter {
             const { jsPDF } = this.jsPDF;
             const doc = new jsPDF('p', 'mm', 'a4');
             
-            // Устанавливаем шрифт по умолчанию
-            doc.setFont('helvetica');
-            
-            // Заголовок отчета
+            // Добавляем заголовок
             doc.setFontSize(16);
-            doc.text(title, 105, 15, { align: 'center' });
+            doc.text(title, 14, 22);
             
-            // Информация о генерации
+            // Добавляем дату генерации
             doc.setFontSize(10);
-            doc.text(`Сгенерировано: ${new Date().toLocaleString('ru-RU')}`, 105, 22, { align: 'center' });
-            
-            let yPos = 30;
+            doc.text(`Generated at: ${new Date().toLocaleString('ru-RU')}`, 14, 30);
             
             if (Array.isArray(data) && data.length > 0) {
-                // Определяем заголовки таблицы
+                // Подготавливаем данные для таблицы
                 const headers = Object.keys(data[0]);
-                
-                // Рассчитываем ширину колонок
-                const pageWidth = 190;
-                const colCount = headers.length;
-                const colWidth = pageWidth / Math.min(colCount, 4); // Максимум 4 колонки для читаемости
-                
-                // Ограничиваем количество колонок для PDF
-                const displayHeaders = headers.slice(0, 4);
-                const displayData = data.map(row => {
-                    const newRow = {};
-                    displayHeaders.forEach(header => {
-                        newRow[header] = this.formatCellValue(row[header]);
+                const body = data.map(row => {
+                    return headers.map(header => {
+                        const value = row[header];
+                        return this.formatCellValue(value);
                     });
-                    return newRow;
                 });
                 
-                // Заголовки таблицы
-                doc.setFillColor(240, 240, 240);
-                doc.rect(10, yPos, colWidth * displayHeaders.length, 8, 'F');
+                // Преобразуем заголовки в читаемый вид
+                const displayHeaders = headers.map(header => 
+                    this.formatHeader(header)
+                );
                 
-                doc.setFontSize(11);
-                doc.setTextColor(0, 0, 0);
-                
-                displayHeaders.forEach((header, index) => {
-                    const xPos = 10 + (index * colWidth) + (colWidth / 2);
-                    doc.text(header.toString(), xPos, yPos + 5, { align: 'center' });
-                });
-                
-                yPos += 8;
-                
-                // Данные таблицы
-                doc.setFontSize(10);
-                
-                displayData.forEach((row, rowIndex) => {
-                    // Проверяем, нужно ли добавлять новую страницу
-                    if (yPos > 270) {
-                        doc.addPage();
-                        yPos = 20;
+                // Создаем таблицу с помощью autoTable
+                doc.autoTable({
+                    head: [displayHeaders],
+                    body: body,
+                    startY: 40,
+                    theme: 'grid',
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3,
+                        overflow: 'linebreak',
+                        halign: 'left',
+                        valign: 'middle'
+                    },
+                    headStyles: {
+                        fillColor: [66, 139, 202],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    columnStyles: {},
+                    didDrawPage: function (data) {
+                        // Добавляем номер страницы
+                        const pageCount = doc.internal.getNumberOfPages();
+                        doc.setFontSize(10);
+                        doc.text(
+                            `Page ${data.pageNumber} of ${pageCount}`,
+                            doc.internal.pageSize.width / 2,
+                            doc.internal.pageSize.height - 10,
+                            { align: 'center' }
+                        );
                     }
-                    
-                    displayHeaders.forEach((header, colIndex) => {
-                        const xPos = 10 + (colIndex * colWidth) + 2;
-                        doc.text(row[header].toString(), xPos, yPos + 5);
-                    });
-                    
-                    yPos += 8;
                 });
-                
-                // Итоговая информация
-                yPos += 10;
-                doc.setFontSize(12);
-                doc.text(`Всего записей: ${data.length}`, 10, yPos);
                 
             } else if (typeof data === 'object' && data !== null) {
                 // Если передан одиночный объект
-                Object.entries(data).forEach(([key, value], index) => {
-                    if (yPos > 270) {
+                const startY = 40;
+                let currentY = startY;
+                
+                Object.entries(data).forEach(([key, value]) => {
+                    if (currentY > 280) {
                         doc.addPage();
-                        yPos = 20;
+                        currentY = 20;
                     }
                     
                     doc.setFontSize(11);
-                    doc.text(`${key}: ${this.formatCellValue(value)}`, 10, yPos);
-                    yPos += 10;
+                    const text = `${this.formatHeader(key)}: ${this.formatCellValue(value)}`;
+                    const lines = doc.splitTextToSize(text, 180);
+                    
+                    doc.text(lines, 14, currentY);
+                    currentY += (lines.length * 7) + 5;
                 });
             } else {
-                doc.text('Нет данных для экспорта', 10, yPos);
+                doc.text('Нет данных для экспорта', 14, 40);
             }
             
             // Сохраняем файл
@@ -111,6 +103,21 @@ class SimplePDFExporter {
             alert('Ошибка при экспорте в PDF: ' + error.message);
             return false;
         }
+    }
+    
+    // Форматирование заголовка
+    formatHeader(header) {
+        if (!header) return '';
+        
+        // Преобразуем snake_case или camelCase в читаемый текст
+        const str = header.toString();
+        let result = str
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, char => char.toUpperCase())
+            .trim();
+        
+        return this.transliterate(result);
     }
     
     // Форматирование значения ячейки
@@ -127,10 +134,21 @@ class SimplePDFExporter {
             return value.toLocaleDateString('ru-RU');
         }
         
-        // Обработка строк для избежания проблем с кодировкой
-        const strValue = value.toString();
+        // Преобразуем в строку
+        const strValue = value.toString().trim();
         
-        // Простая транслитерация кириллицы для избежания проблем
+        // Ограничиваем длину текста для таблицы
+        if (strValue.length > 50) {
+            return this.transliterate(strValue.substring(0, 47) + '...');
+        }
+        
+        return this.transliterate(strValue);
+    }
+    
+    // Простая транслитерация кириллицы
+    transliterate(text) {
+        if (!text) return '';
+        
         const cyrillicToLatin = {
             'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
             'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
@@ -148,30 +166,17 @@ class SimplePDFExporter {
             'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
         };
         
-        // Заменяем кириллические символы
         let result = '';
-        for (let i = 0; i < strValue.length; i++) {
-            const char = strValue[i];
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
             result += cyrillicToLatin[char] || char;
-        }
-        
-        // Ограничиваем длину текста
-        const maxLength = 50;
-        if (result.length > maxLength) {
-            return result.substring(0, maxLength - 3) + '...';
         }
         
         return result;
     }
-    
-    // Простая функция для обратной совместимости
-    static exportPDF(data, title) {
-        const exporter = new SimplePDFExporter();
-        return exporter.exportTableToPDF(data, title);
-    }
 }
 
-// Глобальный экспорт для обратной совместимости
+// Глобальный экспорт
 window.generateStyledPDF = function(data, title) {
     const exporter = new SimplePDFExporter();
     return exporter.exportTableToPDF(data, title);
@@ -181,5 +186,3 @@ window.generatePDF = function(data, title) {
     const exporter = new SimplePDFExporter();
     return exporter.exportTableToPDF(data, title);
 };
-
-window.SimplePDFExporter = SimplePDFExporter;
