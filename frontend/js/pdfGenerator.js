@@ -1,44 +1,21 @@
 // ========== ОБЩИЕ ФУНКЦИИ ==========
 
-// Функция для исправления кодировки (решает проблему с кириллицей)
-function fixEncoding(text) {
-    if (!text) return '';
-    
-    // Простой способ исправить кодировку
-    return text
-        .replace(/[^\x00-\x7F]/g, '') // Удаляем не-ASCII символы
-        .replace(/[А-Яа-яЁё]/g, function(char) {
-            // Простая транслитерация кириллицы
-            const translit = {
-                'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
-                'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
-                'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
-                'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
-                'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch',
-                'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '',
-                'э': 'e', 'ю': 'yu', 'я': 'ya',
-                'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D',
-                'Е': 'E', 'Ё': 'E', 'Ж': 'Zh', 'З': 'Z', 'И': 'I',
-                'Й': 'Y', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N',
-                'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T',
-                'У': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch',
-                'Ш': 'Sh', 'Щ': 'Sch', 'Ъ': '', 'Ы': 'Y', 'Ь': '',
-                'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
-            };
-            return translit[char] || char;
-        });
-}
-
 // Функция для добавления кириллического шрифта
 function addCyrillicFont(doc) {
     try {
-        // Простая реализация кириллического шрифта через стандартный
-        // В реальном проекте нужно добавить настоящий кириллический шрифт
+        // Подключаем стандартный шрифт с поддержкой кириллицы
         doc.setFont("helvetica");
-        doc.setFontSize(12);
+        // Для лучшей поддержки кириллицы в jsPDF
+        doc.setLanguage("ru-RU");
     } catch (error) {
         console.error('Ошибка установки шрифта:', error);
     }
+}
+
+// Функция для безопасного вывода текста
+function safeText(text) {
+    if (!text) return '';
+    return text.toString();
 }
 
 // ========== PDF ДЛЯ СТУДЕНТА ==========
@@ -59,9 +36,9 @@ function exportDiaryToPDF(diaryData, studentInfo) {
         // Информация о студенте
         doc.setFontSize(12);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Студент: ${studentInfo.fullName || 'Не указано'}`, 20, 35);
-        doc.text(`Группа: ${studentInfo.group || 'Не указана'}`, 20, 42);
-        doc.text(`Период практики: ${studentInfo.practicePeriod || 'Не указан'}`, 20, 49);
+        doc.text(`Студент: ${safeText(studentInfo.fullName) || 'Не указано'}`, 20, 35);
+        doc.text(`Группа: ${safeText(studentInfo.group) || 'Не указана'}`, 20, 42);
+        doc.text(`Период практики: ${safeText(studentInfo.practicePeriod) || 'Не указан'}`, 20, 49);
         doc.text(`Дата генерации: ${new Date().toLocaleDateString('ru-RU')}`, 20, 56);
         
         let yPosition = 70;
@@ -107,11 +84,8 @@ function exportDiaryToPDF(diaryData, studentInfo) {
                     ? description.substring(0, maxLength - 3) + '...' 
                     : description;
                 
-                // Исправляем кодировку для описания
-                displayDescription = fixEncoding(displayDescription);
-                
                 doc.text(
-                    displayDescription,
+                    safeText(displayDescription),
                     20 + colWidths[0] + 2,
                     yPosition + 5
                 );
@@ -150,7 +124,7 @@ function exportDiaryToPDF(diaryData, studentInfo) {
         doc.text('Сгенерировано системой управления практиками ОмГТУ', 105, yPosition, { align: 'center' });
         
         // Сохраняем PDF
-        const fileName = `diary_${studentInfo.fullName || 'student'}_${Date.now()}.pdf`;
+        const fileName = `diary_${(studentInfo.fullName || 'student').replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${Date.now()}.pdf`;
         doc.save(fileName);
         
         return true;
@@ -177,8 +151,8 @@ function exportWorksToPDF(worksData, studentInfo) {
         // Информация о студенте
         doc.setFontSize(12);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Студент: ${studentInfo.fullName || 'Не указано'}`, 20, 35);
-        doc.text(`Группа: ${studentInfo.group || 'Не указана'}`, 20, 42);
+        doc.text(`Студент: ${safeText(studentInfo.fullName) || 'Не указано'}`, 20, 35);
+        doc.text(`Группа: ${safeText(studentInfo.group) || 'Не указана'}`, 20, 42);
         doc.text(`Дата генерации: ${new Date().toLocaleDateString('ru-RU')}`, 20, 49);
         
         let yPosition = 60;
@@ -226,11 +200,8 @@ function exportWorksToPDF(worksData, studentInfo) {
                     ? description.substring(0, maxLength - 3) + '...' 
                     : description;
                 
-                // Исправляем кодировку для описания
-                displayDescription = fixEncoding(displayDescription);
-                
                 doc.text(
-                    displayDescription,
+                    safeText(displayDescription),
                     20 + colWidths[0] + 2,
                     yPosition + 5
                 );
@@ -287,7 +258,7 @@ function exportWorksToPDF(worksData, studentInfo) {
         doc.text('Сгенерировано системой управления практиками ОмГТУ', 105, yPosition, { align: 'center' });
         
         // Сохраняем PDF
-        const fileName = `works_${studentInfo.fullName || 'student'}_${Date.now()}.pdf`;
+        const fileName = `works_${(studentInfo.fullName || 'student').replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${Date.now()}.pdf`;
         doc.save(fileName);
         
         return true;
@@ -300,7 +271,7 @@ function exportWorksToPDF(worksData, studentInfo) {
 
 // ========== PDF ДЛЯ АДМИНИСТРАТОРА ==========
 
-// Обновленная функция для администратора с исправлением кодировки
+// Обновленная функция для администратора
 function generateStyledPDF(data, title = 'Отчет системы практик') {
     try {
         const { jsPDF } = window.jspdf;
@@ -314,30 +285,29 @@ function generateStyledPDF(data, title = 'Отчет системы практи
         
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
-        doc.text('OmSTU', 105, 20, { align: 'center' }); // Латинские буквы для избежания проблем
+        doc.text('ОмГТУ', 105, 20, { align: 'center' });
         
         doc.setFontSize(16);
-        doc.text('Practice Management System', 105, 30, { align: 'center' }); // Английский текст
+        doc.text('Система управления практиками', 105, 30, { align: 'center' });
         
-        // Заголовок отчета (используем латинские буквы или транслитерацию)
-        const safeTitle = fixEncoding(title);
+        // Заголовок отчета
         doc.setTextColor(40, 40, 40);
         doc.setFontSize(18);
-        doc.text(safeTitle, 20, 60);
+        doc.text(safeText(title), 20, 60);
         
         // Информация о генерации
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Generation date: ${new Date().toLocaleDateString('en-US')}`, 20, 70);
-        doc.text(`Generation time: ${new Date().toLocaleTimeString('en-US')}`, 20, 76);
+        doc.text(`Дата генерации: ${new Date().toLocaleDateString('ru-RU')}`, 20, 70);
+        doc.text(`Время генерации: ${new Date().toLocaleTimeString('ru-RU')}`, 20, 76);
         
         let yPosition = 90;
         
         if (Array.isArray(data) && data.length > 0) {
-            // Определяем доступные колонки (первые 3-4 для читаемости)
+            // Определяем доступные колонки
             const sampleRow = data[0];
             const headers = Object.keys(sampleRow);
-            const maxColumns = 4; // Максимальное количество колонок для читаемости
+            const maxColumns = 4;
             const visibleHeaders = headers.slice(0, Math.min(headers.length, maxColumns));
             
             const pageWidth = 170;
@@ -350,9 +320,8 @@ function generateStyledPDF(data, title = 'Отчет системы практи
                 doc.setTextColor(40, 40, 40);
                 doc.setFontSize(10);
                 
-                const safeHeader = fixEncoding(header.toString());
                 doc.text(
-                    safeHeader,
+                    safeText(header),
                     20 + (index * colWidth) + (colWidth / 2),
                     yPosition + 5,
                     { align: 'center' }
@@ -380,13 +349,10 @@ function generateStyledPDF(data, title = 'Отчет системы практи
                         ? cellString.substring(0, maxLength - 3) + '...' 
                         : cellString;
                     
-                    // Исправляем кодировку
-                    displayValue = fixEncoding(displayValue);
-                    
                     doc.setTextColor(60, 60, 60);
                     doc.setFontSize(9);
                     doc.text(
-                        displayValue,
+                        safeText(displayValue),
                         20 + (colIndex * colWidth) + 2,
                         yPosition + 5
                     );
@@ -405,7 +371,7 @@ function generateStyledPDF(data, title = 'Отчет системы практи
             yPosition += 15;
             doc.setFontSize(12);
             doc.setTextColor(102, 126, 234);
-            doc.text(`Total records: ${data.length}`, 20, yPosition);
+            doc.text(`Всего записей: ${data.length}`, 20, yPosition);
             
         } else if (typeof data === 'object' && data !== null) {
             // Для одиночного объекта
@@ -415,20 +381,18 @@ function generateStyledPDF(data, title = 'Отчет системы практи
                     yPosition = 20;
                 }
                 
-                const safeKey = fixEncoding(key);
-                const safeValue = fixEncoding(value?.toString() || '');
-                doc.text(`${safeKey}: ${safeValue}`, 20, yPosition);
+                doc.text(`${safeText(key)}: ${safeText(value)}`, 20, yPosition);
                 yPosition += 10;
             });
         } else {
-            doc.text('No data available', 20, yPosition);
+            doc.text('Нет данных для отображения', 20, yPosition);
         }
         
         // Подпись
         yPosition = 280;
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
-        doc.text('Generated by OmSTU Practice Management System', 105, yPosition, { align: 'center' });
+        doc.text('Сгенерировано системой управления практиками ОмГТУ', 105, yPosition, { align: 'center' });
         
         // Сохраняем PDF
         const fileName = `report_${Date.now()}.pdf`;
@@ -436,8 +400,8 @@ function generateStyledPDF(data, title = 'Отчет системы практи
         
         return true;
     } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert('PDF generation error: ' + error.message);
+        console.error('Ошибка генерации PDF:', error);
+        alert('Ошибка при генерации PDF: ' + error.message);
         return false;
     }
 }
@@ -465,7 +429,7 @@ function formatDateTime(dateTimeString) {
 }
 
 // Универсальная функция генерации PDF (для обратной совместимости)
-function generatePDF(data, title = 'Report') {
+function generatePDF(data, title = 'Отчет') {
     return generateStyledPDF(data, title);
 }
 
