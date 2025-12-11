@@ -25,11 +25,9 @@ class AdminPanel {
     }
 
     switchTab(tabId) {
-        // Hide all tabs
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         
-        // Show selected tab
         document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
         document.getElementById(`${tabId}-tab`).classList.add('active');
     }
@@ -46,13 +44,13 @@ class AdminPanel {
             document.getElementById('totalPractices').textContent = practices.length;
             document.getElementById('totalDiaryEntries').textContent = diary.length;
             document.getElementById('activeStudents').textContent = 
-                users.filter(u => u.username.startsWith('student')).length;
+                users.filter(u => u.username && u.username.startsWith('student')).length;
         } catch (error) {
             console.error('Error loading stats:', error);
         }
     }
 
-    async executeQuery(queryType, ...args) {
+    async executeQuery(queryType) {
         const queryMap = {
             'users': () => this.api.getAllUsers(),
             'practices': () => this.api.getAllPractices(),
@@ -71,12 +69,12 @@ class AdminPanel {
             this.displayResult(result, queryType);
             this.lastResult = result;
         } catch (error) {
-            this.showAlert(`Ошибка выполнения запроса: ${error.message}`, 'error');
+            this.showAlert(`Ошибка: ${error.message}`, 'error');
         }
     }
 
     async executeDynamicQuery() {
-        const query = document.getElementById('dynamicQuery').value.trim();
+        const query = document.getElementById('dynamicQuery')?.value.trim();
         if (!query) {
             this.showAlert('Введите SQL запрос', 'error');
             return;
@@ -91,19 +89,16 @@ class AdminPanel {
         }
     }
 
-    async executeFunction(funcType, ...args) {
+    async executeFunction(funcType) {
         try {
             let result;
-            switch(funcType) {
-                case 'students-count':
-                    const practiceId = prompt('Введите ID практики:', '1');
-                    if (practiceId) {
-                        result = await this.api.getStudentsCountOnPractice(practiceId);
-                    }
-                    break;
-                case 'avg-diary':
-                    result = await this.api.getAvgDiaryEntries();
-                    break;
+            if (funcType === 'students-count') {
+                const practiceId = prompt('Введите ID практики:', '1');
+                if (practiceId) {
+                    result = await this.api.getStudentsCountOnPractice(practiceId);
+                }
+            } else if (funcType === 'avg-diary') {
+                result = await this.api.getAvgDiaryEntries();
             }
             
             if (result) {
@@ -111,31 +106,28 @@ class AdminPanel {
                 this.lastResult = result;
             }
         } catch (error) {
-            this.showAlert(`Ошибка выполнения функции: ${error.message}`, 'error');
+            this.showAlert(`Ошибка: ${error.message}`, 'error');
         }
     }
 
     async executeProcedure(procType) {
         try {
             let result;
-            switch(procType) {
-                case 'add-student':
-                    const studentData = {
-                        username: prompt('Имя пользователя:', 'new_student'),
-                        password: prompt('Пароль:', '123'),
-                        full_name: prompt('Полное имя:', 'Новый Студент'),
-                        group_id: prompt('ID группы:', '1'),
-                        practice_id: prompt('ID практики:', '1')
-                    };
-                    result = await this.api.addStudentProcedure(studentData);
-                    break;
-                case 'close-practice':
-                    const practiceData = {
-                        practice_id: prompt('ID практики:', '1'),
-                        end_date: prompt('Дата окончания (ГГГГ-ММ-ДД):', '2025-12-31')
-                    };
-                    result = await this.api.closePracticeProcedure(practiceData);
-                    break;
+            if (procType === 'add-student') {
+                const studentData = {
+                    username: prompt('Имя пользователя:', 'new_student'),
+                    password: prompt('Пароль:', '123'),
+                    full_name: prompt('Полное имя:', 'Новый Студент'),
+                    group_id: prompt('ID группы:', '1'),
+                    practice_id: prompt('ID практики:', '1')
+                };
+                result = await this.api.addStudentProcedure(studentData);
+            } else if (procType === 'close-practice') {
+                const practiceData = {
+                    practice_id: prompt('ID практики:', '1'),
+                    end_date: prompt('Дата окончания (ГГГГ-ММ-ДД):', '2025-12-31')
+                };
+                result = await this.api.closePracticeProcedure(practiceData);
             }
             
             if (result) {
@@ -143,27 +135,24 @@ class AdminPanel {
                 this.lastResult = result;
             }
         } catch (error) {
-            this.showAlert(`Ошибка выполнения процедуры: ${error.message}`, 'error');
+            this.showAlert(`Ошибка: ${error.message}`, 'error');
         }
     }
 
     async executeTransaction(transType) {
         try {
             let result;
-            switch(transType) {
-                case 'move-student':
-                    const moveData = {
-                        student_id: prompt('ID студента:', '1'),
-                        new_group_id: prompt('Новый ID группы:', '2')
-                    };
-                    result = await this.api.moveStudentTransaction(moveData);
-                    break;
-                case 'delete-student':
-                    const deleteData = {
-                        student_id: prompt('ID студента для удаления:', '3')
-                    };
-                    result = await this.api.deleteStudentTransaction(deleteData);
-                    break;
+            if (transType === 'move-student') {
+                const moveData = {
+                    student_id: prompt('ID студента:', '1'),
+                    new_group_id: prompt('Новый ID группы:', '2')
+                };
+                result = await this.api.moveStudentTransaction(moveData);
+            } else if (transType === 'delete-student') {
+                const deleteData = {
+                    student_id: prompt('ID студента для удаления:', '3')
+                };
+                result = await this.api.deleteStudentTransaction(deleteData);
             }
             
             if (result) {
@@ -171,7 +160,7 @@ class AdminPanel {
                 this.lastResult = result;
             }
         } catch (error) {
-            this.showAlert(`Ошибка выполнения транзакции: ${error.message}`, 'error');
+            this.showAlert(`Ошибка: ${error.message}`, 'error');
         }
     }
 
@@ -179,7 +168,8 @@ class AdminPanel {
         const resultArea = document.getElementById('queryResult');
         if (!resultArea) return;
 
-        let html = `<h3>Результат: ${this.getQueryTitle(title)}</h3>`;
+        const queryTitle = this.getQueryTitle(title);
+        let html = `<h3>${queryTitle}</h3>`;
         
         if (Array.isArray(data) && data.length > 0) {
             const headers = Object.keys(data[0]);
@@ -229,31 +219,17 @@ class AdminPanel {
         return titles[type] || type;
     }
 
+    // Упрощенная функция генерации PDF
     generatePDF() {
         if (!this.lastResult) {
             this.showAlert('Нет данных для генерации отчета', 'error');
             return;
         }
-    
-        // Используем pdfGenerator.js
-        if (typeof generateStyledPDF === 'function') {
-            // Отключаем кнопку на время генерации
-            const pdfBtn = document.getElementById('generatePDF');
-            if (pdfBtn) {
-                const originalText = pdfBtn.innerHTML;
-                pdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерация...';
-                pdfBtn.disabled = true;
-                
-                setTimeout(() => {
-                    generateStyledPDF(this.lastResult, 'Отчет системы практик');
-                    
-                    // Восстанавливаем кнопку
-                    pdfBtn.innerHTML = originalText;
-                    pdfBtn.disabled = false;
-                }, 100);
-            } else {
-                generateStyledPDF(this.lastResult, 'Отчет системы практик');
-            }
+
+        const title = this.getQueryTitle('last') || 'Отчет';
+        
+        if (typeof generatePDF === 'function') {
+            generatePDF(this.lastResult, title);
         } else {
             this.showAlert('Функция генерации PDF недоступна', 'error');
         }
@@ -264,13 +240,15 @@ class AdminPanel {
         alertDiv.className = `alert alert-${type}`;
         alertDiv.innerHTML = `
             <span>${message}</span>
-            <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; cursor: pointer;">×</button>
+            <button onclick="this.parentElement.remove()" 
+                    style="margin-left: auto; background: none; border: none; cursor: pointer;">×</button>
         `;
         
         const container = document.querySelector('main');
-        container.insertBefore(alertDiv, container.firstChild);
-        
-        setTimeout(() => alertDiv.remove(), 5000);
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
     }
 
     setupEventListeners() {
