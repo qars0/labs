@@ -57,6 +57,7 @@ header {
 }
 
 .user-info {
+    color:var(--color-secondary);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -116,7 +117,7 @@ main {
     color: var(--color-contrast);
     margin-bottom: 30px;
     font-size: 28px;
-    border-bottom: 3px solid var(--color-primary);
+    border-bottom: 3px solid var(--color-secondary);
     padding-bottom: 10px;
     display: flex;
     align-items: center;
@@ -360,7 +361,7 @@ textarea.form-control {
 }
 
 .stat-label {
-    color: var(--color-secondary);
+    color: var(--color-contrast);
     font-size: 14px;
 }
 
