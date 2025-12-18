@@ -225,7 +225,7 @@ class AdminPanel {
             this.showAlert('Нет данных для генерации отчета', 'error');
             return;
         }
-
+    
         const title = this.getQueryTitle('last') || 'Отчет';
         
         if (typeof generatePDF === 'function') {
@@ -291,10 +291,10 @@ class AdminPanel {
         }
 
         // Generate PDF
-        const generatePDFBtn = document.getElementById('generatePDF');
-        if (generatePDFBtn) {
-            generatePDFBtn.addEventListener('click', () => this.generatePDF());
-        }
+        //const generatePDFBtn = document.getElementById('generatePDF');
+        //if (generatePDFBtn) {
+        //    generatePDFBtn.addEventListener('click', () => this.generatePDF());
+        //}
     }
 }
 

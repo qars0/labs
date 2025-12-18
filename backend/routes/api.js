@@ -3,10 +3,47 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const queryController = require('../controllers/queryController');
 const mainController = require('../controllers/mainController');
+const adminController = require('../controllers/adminController');
 
 // === АВТОРИЗАЦИЯ ===
 router.post('/auth/login', authController.login);
 router.post('/auth/check', authController.checkAuth);
+
+// === CRUD ДЛЯ 5 ТАБЛИЦ (АДМИНИСТРАТОР) ===
+
+// Practice Locations
+router.get('/admin/locations', adminController.getLocations);
+router.post('/admin/locations', adminController.createLocation);
+router.put('/admin/locations/:id', adminController.updateLocation);
+router.delete('/admin/locations/:id', adminController.deleteLocation);
+
+// Student Groups
+router.get('/admin/groups', adminController.getGroups);
+router.post('/admin/groups', adminController.createGroup);
+router.put('/admin/groups/:id', adminController.updateGroup);
+router.delete('/admin/groups/:id', adminController.deleteGroup);
+
+// Roles
+router.get('/admin/roles', adminController.getRoles);
+router.post('/admin/roles', adminController.createRole);
+router.put('/admin/roles/:id', adminController.updateRole);
+router.delete('/admin/roles/:id', adminController.deleteRole);
+
+// User Positions
+router.get('/admin/positions', adminController.getPositions);
+router.post('/admin/positions', adminController.createPosition);
+router.put('/admin/positions/:id', adminController.updatePosition);
+router.delete('/admin/positions/:id', adminController.deletePosition);
+
+// Supervisors
+router.get('/admin/supervisors', adminController.getSupervisors);
+router.post('/admin/supervisors', adminController.createSupervisor);
+router.put('/admin/supervisors/:id', adminController.updateSupervisor);
+router.delete('/admin/supervisors/:id', adminController.deleteSupervisor);
+
+// Вспомогательные методы
+router.get('/admin/organizations', adminController.getOrganizations);
+router.get('/admin/practices', adminController.getPractices);
 
 // === СТУДЕНЧЕСКИЕ ФУНКЦИИ ===
 

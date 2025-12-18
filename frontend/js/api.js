@@ -31,6 +31,107 @@ class API {
         }
     }
 
+    // === CRUD ДЛЯ 5 ТАБЛИЦ ===
+
+    // Practice Locations
+    async getLocations() {
+        return this.request('/admin/locations');
+    }
+
+    async createLocation(location) {
+        return this.request('/admin/locations', 'POST', { location });
+    }
+
+    async updateLocation(id, location) {
+        return this.request(`/admin/locations/${id}`, 'PUT', { location });
+    }
+
+    async deleteLocation(id) {
+        return this.request(`/admin/locations/${id}`, 'DELETE');
+    }
+
+    // Student Groups
+    async getGroups() {
+        return this.request('/admin/groups');
+    }
+
+    async createGroup(group_name) {
+        return this.request('/admin/groups', 'POST', { group_name });
+    }
+
+    async updateGroup(id, group_name) {
+        return this.request(`/admin/groups/${id}`, 'PUT', { group_name });
+    }
+
+    async deleteGroup(id) {
+        return this.request(`/admin/groups/${id}`, 'DELETE');
+    }
+
+    // Roles
+    async getRoles() {
+        return this.request('/admin/roles');
+    }
+
+    async createRole(role_name) {
+        return this.request('/admin/roles', 'POST', { role_name });
+    }
+
+    async updateRole(id, role_name) {
+        return this.request(`/admin/roles/${id}`, 'PUT', { role_name });
+    }
+
+    async deleteRole(id) {
+        return this.request(`/admin/roles/${id}`, 'DELETE');
+    }
+
+    // User Positions
+    async getPositions() {
+        return this.request('/admin/positions');
+    }
+
+    async createPosition(position_name, organization_id) {
+        return this.request('/admin/positions', 'POST', { position_name, organization_id });
+    }
+
+    async updatePosition(id, position_name, organization_id) {
+        return this.request(`/admin/positions/${id}`, 'PUT', { position_name, organization_id });
+    }
+
+    async deletePosition(id) {
+        return this.request(`/admin/positions/${id}`, 'DELETE');
+    }
+
+    // Supervisors
+    async getSupervisors() {
+        return this.request('/admin/supervisors');
+    }
+
+    async createSupervisor(practice_id, position_id, role_id, full_name) {
+        return this.request('/admin/supervisors', 'POST', { 
+            practice_id, 
+            position_id, 
+            role_id, 
+            full_name 
+        });
+    }
+
+    async updateSupervisor(id, data) {
+        return this.request(`/admin/supervisors/${id}`, 'PUT', data);
+    }
+
+    async deleteSupervisor(id) {
+        return this.request(`/admin/supervisors/${id}`, 'DELETE');
+    }
+
+    // Вспомогательные методы
+    async getOrganizations() {
+        return this.request('/admin/organizations');
+    }
+
+    async getPractices() {
+        return this.request('/admin/practices');
+    }
+    
     // Auth
     async login(username, password) {
         return this.request('/auth/login', 'POST', { username, password });

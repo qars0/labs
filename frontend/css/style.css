@@ -492,3 +492,94 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+
+/* Стили для CRUD таблиц */
+.crud-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.crud-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.crud-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.crud-table tr:hover {
+    background: #f8f9fa;
+}
+
+.crud-table input[type="text"],
+.crud-table select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.crud-table input[type="text"]:focus,
+.crud-table select:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Кнопки действий в таблице */
+.table-actions {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.table-actions .btn {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Формы создания */
+.create-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
+.create-form .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.create-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #495057;
+}
+
+/* Табы CRUD */
+.crud-tabs {
+    margin-top: 20px;
+}
+
+.crud-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.crud-section h4 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+}

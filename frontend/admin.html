@@ -47,6 +47,7 @@
                 <button class="tab" data-tab="functions">Функции</button>
                 <button class="tab" data-tab="procedures">Процедуры</button>
                 <button class="tab" data-tab="transactions">Транзакции</button>
+                <button class="tab" data-tab="crud">CRUD таблиц</button>
             </div>
 
             <!-- Вкладка запросов -->
@@ -225,6 +226,193 @@
                 </div>
             </div>
 
+            <!-- CRUD -->
+            <div id="crud-tab" class="tab-content">
+                <div class="card">
+                    <h3><i class="fas fa-database"></i> Управление таблицами</h3>
+
+                    <!-- Practice Locations -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-map-marker-alt"></i> Места проведения практики</h4>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="createLocation" class="form-control" 
+                                   placeholder="Новое место проведения" style="flex: 1;">
+                            <button id="createLocationBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Место проведения</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="locationsTable">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #999;">
+                                            Загрузка...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                    <!-- Student Groups -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-users"></i> Учебные группы</h4>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="createGroup" class="form-control" 
+                                   placeholder="Название группы" style="flex: 1;">
+                            <button id="createGroupBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название группы</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="groupsTable">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #999;">
+                                            Загрузка...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                    <!-- Roles -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-user-tag"></i> Роли руководителей</h4>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="createRole" class="form-control" 
+                                   placeholder="Название роли" style="flex: 1;">
+                            <button id="createRoleBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название роли</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rolesTable">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #999;">
+                                            Загрузка...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                    <!-- User Positions -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-briefcase"></i> Должности</h4>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="createPositionName" class="form-control" 
+                                   placeholder="Название должности" style="flex: 1;">
+                            <select id="createPositionOrg" class="form-control" style="flex: 1;">
+                                <option value="">Выберите организацию...</option>
+                            </select>
+                            <button id="createPositionBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Должность</th>
+                                        <th>Организация</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="positionsTable">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: #999;">
+                                            Загрузка...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                    <!-- Supervisors -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-chalkboard-teacher"></i> Руководители практики</h4>
+
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                            <input type="text" id="createSupervisorName" class="form-control" 
+                                   placeholder="ФИО руководителя">
+                            <select id="createSupervisorPractice" class="form-control">
+                                <option value="">Практика...</option>
+                            </select>
+                            <select id="createSupervisorPosition" class="form-control">
+                                <option value="">Должность...</option>
+                            </select>
+                            <select id="createSupervisorRole" class="form-control">
+                                <option value="">Роль...</option>
+                            </select>
+                        </div>
+
+                        <div style="text-align: right; margin-bottom: 15px;">
+                            <button id="createSupervisorBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Добавить руководителя
+                            </button>
+                        </div>
+
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>ФИО</th>
+                                        <th>Практика</th>
+                                        <th>Должность</th>
+                                        <th>Роль</th>
+                                        <th>Организация</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supervisorsTable">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; color: #999;">
+                                            Загрузка...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Результаты запросов -->
             <div class="card">
                 <h3><i class="fas fa-poll"></i> Результаты запросов</h3>
@@ -244,12 +432,67 @@
             </div>
         </main>
     </div>
-
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/pdfGenerator.js"></script>
-    <script src="js/admin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/pdfGenerator.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/admin-crud.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Проверяем авторизацию администратора
+            if (!auth.requireAdmin()) return;
+
+            // Инициализируем UI
+            auth.updateUI();
+
+            // Получаем текущего пользователя
+            const user = auth.getCurrentUser();
+            if (!user || !user.isAdmin) {
+                window.location.href = 'student.html';
+                return;
+            }
+
+            console.log('Администратор авторизован:', user);
+
+            // Настройка табов
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+
+                    // Скрываем все табы
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                    // Показываем выбранный таб
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+
+                    // Если это таб CRUD, инициализируем его
+                    if (tabId === 'crud') {
+                        console.log('Инициализация CRUD...');
+                        adminCRUD.init().catch(error => {
+                            console.error('Ошибка инициализации CRUD:', error);
+                        });
+                    }
+                });
+            });
+
+            // Если активен таб CRUD, инициализируем его сразу
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab && activeTab.getAttribute('data-tab') === 'crud') {
+                console.log('Активный таб CRUD, инициализация...');
+                adminCRUD.init().catch(error => {
+                    console.error('Ошибка инициализации CRUD:', error);
+                });
+            }
+
+            // Инициализируем панель администратора (для других табов)
+            adminPanel.init();
+        });
+    </script>
 </body>
 </html>
